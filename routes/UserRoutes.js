@@ -2,9 +2,14 @@ const express = require("express");
 const router = express.Router();
 const mongoose = require("mongoose");
 const User = require("../modules/UserSchema");
+
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const passport = require("passport");
+
+
+
+
 
 // ==============================
 // 🔐 AUTHENTICATION ROUTES (Public)
@@ -13,6 +18,7 @@ const passport = require("passport");
 // 📝 REGISTER USER
 router.post("/register", async (req, res) => {
     try {
+
         const { name, email, password, phone } = req.body;
 
         // Basic validation
@@ -25,6 +31,7 @@ router.post("/register", async (req, res) => {
 
         // Check existing user
         const existingUser = await User.findOne({ email });
+
         if (existingUser) {
             return res.status(400).json({
                 success: false,
@@ -50,6 +57,7 @@ router.post("/register", async (req, res) => {
             process.env.JWT_SECRET,
             { expiresIn: "7d" }
         );
+
 
         res.status(201).json({
             success: true,
@@ -91,6 +99,7 @@ router.post("/login", async (req, res) => {
                 message: "Invalid email or password"
             });
         }
+
 
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
