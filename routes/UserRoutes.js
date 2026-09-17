@@ -11,6 +11,8 @@ const passport = require("passport");
 
 
 
+
+
 // ==============================
 // 🔐 AUTHENTICATION ROUTES (Public)
 // ==============================
@@ -109,11 +111,12 @@ router.post("/login", async (req, res) => {
             });
         }
 
-        const token = jwt.sign(
-            { id: user._id, role: user.role },
-            process.env.JWT_SECRET,
-            { expiresIn: "7d" }
-        );
+        const token = jwt.sign( { id: user._id }, process.env.JWT_SECRET );
+
+
+
+
+
 
         res.status(200).json({
             success: true,
@@ -175,21 +178,7 @@ router.post("/refresh-token", async (req, res) => {
     }
 });
 
-// 🔐 LOGOUT USER
-router.post("/logout", passport.authenticate("jwt", { session: false }), async (req, res) => {
-    try {
-        await User.findByIdAndUpdate(req.user._id, { refreshToken: null });
-        res.json({
-            success: true,
-            message: "Logged out successfully"
-        });
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: error.message
-        });
-    }
-});
+
 
 // ==============================
 // 👤 USER PROFILE ROUTES (Protected)
@@ -421,9 +410,13 @@ router.delete("/address/:addressId", passport.authenticate("jwt", { session: fal
             });
         }
 
+
         user.addresses = user.addresses.filter(
             (addr) => addr._id.toString() !== req.params.addressId
         );
+
+        console.log(addresses);
+        
 
         await user.save();
 
