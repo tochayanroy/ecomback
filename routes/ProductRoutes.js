@@ -53,7 +53,7 @@ const upload = multer({
 // ==============================
 
 // 📥 GET ALL PRODUCTS (with filters, sorting, pagination)
-router.get("/", async (req, res) => {
+router.get("/", passport.authenticate("jwt", { session: false }), async (req, res) => {
     try {
         const { limit = 50 } = req.query;
         const limitNum = parseInt(limit);
@@ -132,7 +132,7 @@ router.get("/", async (req, res) => {
 });
 
 // 📄 GET SINGLE PRODUCT
-router.get("/:id", async (req, res) => {
+router.get("/:id", passport.authenticate("jwt", { session: false }), async (req, res) => {
     try {
         const product = await Product.findById(req.params.id)
             .populate("category", "name slug description")
@@ -167,7 +167,7 @@ router.get("/:id", async (req, res) => {
 });
 
 // 🔍 SEARCH PRODUCTS
-router.get("/search/:query", async (req, res) => {
+router.get("/search/:query", passport.authenticate("jwt", { session: false }), async (req, res) => {
     try {
         const query = req.params.query;
         const products = await Product.find({
