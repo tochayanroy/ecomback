@@ -35,6 +35,21 @@ const userSchema = new mongoose.Schema({
 		default: null
 	},
 
+	
+
+	profileImage: {
+		type: String,
+		default: null
+	},
+	
+	profileImagePublicId: {
+		type: String,
+		default: null
+	},
+
+
+
+
 	// 🛡️ Role & Access
 	role: {
 		type: String,
@@ -79,7 +94,7 @@ const userSchema = new mongoose.Schema({
 		}
 	],
 
-	
+
 	// ⭐ Reviews (user wrote)
 	reviews: [
 		{

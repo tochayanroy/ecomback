@@ -10,6 +10,15 @@ const passport = require("passport");
 
 
 
+const {
+    uploadUserProfile,
+    handleMulterError,
+    uploadBufferToCloudinary,
+    deleteFromCloudinary,
+    extractPublicId,
+} = require('../middleware/cloudinaryUpload.js');
+
+
 
 
 
@@ -303,6 +312,51 @@ router.delete("/profile", passport.authenticate("jwt", { session: false }), asyn
         res.status(500).json({ success: false, message: error.message });
     }
 });
+
+router.post(
+    '/uploadProfileImage',
+    passport.authenticate("jwt", { session: false }),
+    uploadUserProfile,
+    handleMulterError,
+    async (req, res) => {
+        try {
+            if (!req.file) {
+                return res.status(400).json({ error: 'No image file uploaded' });
+            }
+
+            const user = await User.findById(req.user._id);
+            if (!user) return res.status(404).json({ error: 'User not found' });
+
+            // Delete old image from Cloudinary
+            if (user.profileImagePublicId) {
+                await deleteFromCloudinary(user.profileImagePublicId, 'image');
+            }
+
+            // Upload new image to Cloudinary
+            const result = await uploadBufferToCloudinary(req.file.buffer, {
+                folder: 'exam-app/profiles',
+                resource_type: 'image',
+                transformation: [
+                    { width: 500, height: 500, crop: 'fill', gravity: 'face' },
+                    { quality: 'auto', fetch_format: 'auto' },
+                ],
+            });
+
+            user.profileImage = result.secure_url;
+            user.profileImagePublicId = result.public_id;
+            await user.save();
+
+            res.json({
+                message: 'Profile image updated successfully',
+                profileImage: user.profileImage,
+            });
+        } catch (error) {
+            console.error('Profile image upload error:', error);
+            res.status(500).json({ error: 'Server error while uploading profile image' });
+        }
+    }
+);
+
 
 // ==============================
 // 📍 ADDRESS MANAGEMENT
